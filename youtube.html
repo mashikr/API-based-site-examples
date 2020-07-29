@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="img/youtube.png" type="image/x-icon">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>YouTube API site</title>
+    <style>
+        .container {
+            height: 100vh;
+        }
+        #result {
+            height: 80vh;
+            overflow-y: scroll;
+        }
+        #player {
+            height: 18rem;
+        }
+        .play-btn {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: absolute;
+            height: 100%;
+            width: calc( 100% - 1rem);
+            background-color: rgba(9, 9, 9, .5);
+            top: 100%;
+            transition: all .5s;
+        }
+        #play-div {
+            overflow: hidden;
+        }
+        #play-div:hover .play-btn {
+            top: 0;
+            cursor: pointer;
+        }
+        .card span {
+            font-size: .8rem;
+        }
+        @media only screen and (max-width: 992px) {
+            #player-div {
+                position: absolute;
+                left: 0;
+            }
+            #result {
+                margin-top: 3rem;
+                height: 75vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container py-sm-3">
+        <form class="d-flex p-3" action="#" id="form">
+            <input type="text" class="form-control mr-3" placeholder="Search key">
+            <button type="submit" class="btn btn-danger">Search</button>
+        </form>
+
+        <div class="row p-3 position-relative">
+            <div class="col-lg-6 bg-light py-3"  id="result">
+                
+                <!-- <div class="card mb-2 flex-sm-row">
+                    <div class="w-100 w-sm-50 align-self-center p-2 position-relative" id="play-div">
+                        <img src="https://i.ytimg.com/vi/eUXSKIvVEiw/default.jpg" alt="Video Image" class="w-100" id="play">
+                        <div class="play-btn">
+                            <button class="btn btn-primary">Play</button>
+                        </div>
+                    </div>
+                    <div class="w-sm-50 p-2">
+                        <h6>Experiment Car vs Pepsi | Crushing crunchy & soft things by car | Test Ex</h6>
+                        <p class="mb-0 text-muted">by <a href="#" target="_blank">Test Ex</a></p>
+                        <span>Warning! Dangerous crash test, don´t try this by yourself!! Experiment Car vs Pepsi. Crushing crunchy & soft things by car ! TOP 10 Experiments ...</span>
+                    </div> 
+                </div> -->
+               
+               
+                
+            </div>
+            <div class="col-lg-6" id="player-div">
+                <button class="btn btn-block btn-sm bg-secondary text-light" id="player-btn">Player</button>
+                <div id="player" class="bg-dark">
+                    <div class="d-flex h-100 justify-content-center align-items-center">
+                        <img src="img/youtube.png" height="150rem" alt="YouTube">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function(){
+
+            $('#player').slideUp('slow');
+            $('#player-btn').click(function(){
+                $('#player').slideToggle('slow');
+            });
+
+            $('#form').submit(function() {
+                console.log('test');
+                var key = $('input[type="text"]');
+                if(key.val()){
+                    var url = 'https://www.googleapis.com/youtube/v3/search/?part=snippet&key=AIzaSyDreWJoumx2zeI8VFQQQqCIqLMe4qY8tKo&q=' + key.val() +'&maxResults=30';
+
+                    key.val('');
+
+                    $.getJSON(url, function(data) {
+
+                        $('#result').html('');
+
+                        data.items.forEach(el => {
+                            var html = `
+                            <div class="card mb-2 flex-sm-row">
+                                <div class="w-100 w-sm-50 align-self-center p-2 position-relative" id="play-div">
+                                    <img src="${el.snippet.thumbnails.medium.url}" alt="Video Image" class="w-100" id="play">
+                                    <div class="play-btn">
+                                        <button class="btn btn-primary" id="play-${el.id.videoId}">Play</button>
+                                    </div>
+                                </div>
+                                <div class="w-sm-50 p-2">
+                                    <h6>${el.snippet.title}</h6>
+                                    <p class="mb-0 text-muted">by <a href="https://www.youtube.com/channel/${el.snippet.channelId}" target="_blank">${el.snippet.channelTitle}</a></p>
+                                    <span>${el.snippet.description}</span>
+                                </div> 
+                            </div>`;
+
+                            $('#result').append(html);
+
+                            var videoId = el.id.videoId;
+                            $('#play-' + videoId).click(function () {palyVideo(videoId)});
+                        });
+
+                        function palyVideo(videoId) {                            
+                            var markup = `<iframe width="100%" height="315"
+                                            src="https://www.youtube.com/embed/${videoId}?autoplay=1">
+                                        </iframe>`;
+                            $('#player').slideDown('slow').html('').html(markup);
+                        }
+                    })
+                }
+            });
+        });
+    </script>
+</body>
+</html>
