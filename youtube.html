@@ -98,7 +98,6 @@
             });
 
             $('#form').submit(function() {
-                console.log('test');
                 var key = $('input[type="text"]');
                 if(key.val()){
                     var url = 'https://www.googleapis.com/youtube/v3/search/?part=snippet&key=AIzaSyDreWJoumx2zeI8VFQQQqCIqLMe4qY8tKo&q=' + key.val() +'&maxResults=30';
