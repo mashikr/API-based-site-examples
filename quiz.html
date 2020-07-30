@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="img/quiz.png" type="image/x-icon">
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <title>Quiz site</title>
+    <style>
+       .wrong, .right {
+           font-size: 2rem;
+           transform: rotate(-30deg);
+           display: none;
+       }
+       #score-outer {
+        display: none;
+       }
+    </style>
+</head>
+<body>
+    <div class="container text-center">
+        <span class="display-4">Quiz site</span>
+        <hr>
+       <div class="row px-3 mb-3 justify-content-between"> 
+           <button class="btn btn-success" id="start">Start Quiz</button>
+           <h5 id="score-outer">Score : <span id="score">0/0</span></h5>
+        </div>
+        <div class="row">
+            <div class="col-md-10 col-lg-6 text-left" id="quiz-parent">
+
+                <!-- <div id="qustion" class="card">
+                    <div class="card-header">
+                        Category: <b> Fruit</b>
+                    </div>
+                    <div class="card-body">
+                     <h6>Qus: What is orange?</h6>
+                     <div class="row">
+                        <div class="col-8 flex-grow-1">
+                            <input type="radio" name="ans" id="" value="false"> <label for="ans">Color</label> <br>
+                            <input type="radio" name="ans" id="" value="true"> <label for="ans">Fruit</label> <br>
+                            <input type="radio" name="ans" id="" value="false"> <label for="ans">Flower</label> <br>
+                            <input type="radio" name="ans" id="" value="false"> <label for="ans">Animal</label>
+                        </div>
+                        <div class="col">
+                            <p class="wrong text-danger">wrong!</p>
+                            <p class="right text-success">correct!</p>
+                        </div>
+                     </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-success">Submit</button>               
+                        <button class="btn btn-info float-right">Next one</button>               
+                    </div>
+                 </div> -->
+
+            </div>
+        </div>
+    </div>
+
+    <script src="js/jquery-3.5.1.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            var state = false;
+            var totalQus = 0;
+            var correct = 0;
+
+            $('#start').click(() => {
+
+                if(!state) {
+                    state = true;
+                    loadQuiz();
+                    
+                    $('#score-outer').css("display","block");
+                    var markup = `
+                    <div id="qustion" class="card">
+                        <div class="card-header">
+                            <u>Category:</u> <b id="category"></b>
+                        </div>
+                        <div class="card-body">
+                        <h6><u>Qus:</u> <span id="question"></span></h6>
+                        <div class="row">
+                            <div class="col-8 flex-grow-1" id="options">
+                                
+                            </div>
+                            <div class="col d-flex align-items-center">
+                                <p class="wrong text-danger">wrong!</p>
+                                <p class="right text-success">correct!</p>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="card-footer">
+                            <button class="btn btn-success" id="quiz-submit">Submit</button>               
+                            <button class="btn btn-info float-right" id="next-one">Next one</button>               
+                        </div>
+                    </div>`;
+
+                    $('#quiz-parent').html('').append(markup);
+                    $('#start').text('Stop Quiz').removeClass('btn-success').addClass('btn-danger');
+
+                    /// next one event
+                     $('#next-one').click(() => {
+                        $('.right').hide();
+                        $('.wrong').hide();
+                        $('#quiz-submit').show();
+                         loadQuiz();
+                     });
+
+                     // submit button event
+                     $('#quiz-submit').click(() => {
+
+                        if($('input[name="ans"]:checked').val() == 'true') {
+                            totalQus++;
+                            correct++;
+                            $('.right').show();
+                        } else {
+                            totalQus++;
+                            $('.wrong').show();
+                            $('input[value="true"]').parent().css("background-color", "#a5efad");
+                        }
+
+                        $('#score').text(correct + '/' + totalQus);
+
+                        $('#quiz-submit').hide();
+                     });
+
+                } else {
+                    state = false;
+                    $('#score-outer').css("display","none");
+                    $('#quiz-parent').html('');
+                    $('#start').text('Start Quiz').removeClass('btn-danger').addClass('btn-success');
+
+                    $('#quiz-parent').html('<div class="text-center"><h5>Your score is ' + correct + ' out off ' + totalQus + '</h5></div>');
+                    $('#score').text('0/0');
+                    totalQus = 0;
+                    correct = 0;
+                }
+            });
+
+            function loadQuiz() {
+                var url = 'https://opentdb.com/api.php?amount=1';
+                $.get(url, function(data) {
+                    //console.log(data.results[0]);
+                    var obj = [];
+                    obj.type = data.results[0].type;
+                    obj.category = data.results[0].category;
+                    obj.question = data.results[0].question;
+                    data.results[0].incorrect_answers.push(data.results[0].correct_answer);
+                    obj.options = data.results[0].incorrect_answers;
+                    obj.correct_answer = data.results[0].correct_answer;
+                    quizCreate(obj);
+                });
+            };
+
+            function quizCreate(data) {
+                //console.log(data.correct_answer);
+                $('#category').html('').html(data.category);
+                $('#question').html('').html(data.question);
+
+                if(data.type == 'multiple') data.options.sort();
+
+                var options = '';
+
+                data.options.forEach((el, i) => {
+                    options += `<div><input type="radio" name="ans" id="" value="${data.correct_answer == data.options[i] ? 'true' : 'false'}"> <label for="ans">${data.options[i]}</label></div>`;
+                });
+
+                $('#options').html('').append(options);
+            };
+
+           
+
+        });
+    </script>
+</body>
+</html>
