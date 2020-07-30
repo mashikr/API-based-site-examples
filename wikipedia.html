@@ -31,7 +31,7 @@
         $(document).ready(function() {
             $('#submit').submit(function(){
                 
-                var searchToken = $('input[name="searchTerm"]');
+                var searchToken = $('input[type="text"]');
 
                 if(searchToken.val()) {
                     var url = 'https://en.wikipedia.org/w/api.php?format=json&action=opensearch&origin=*&search=' + searchToken.val();
